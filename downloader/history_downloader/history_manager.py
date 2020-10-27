@@ -7,7 +7,9 @@ class HistoryDownloader:
         """ init
             Paramaters
             ------------
-            exchange_name: str required - name of cryptocurrency, e.g. 'binance'
+            exchange_name: str required
+                name of cryptocurrency, e.g. 'binance'
+
             crypto_symbol: str required - symbol of cryptocurrency, e.g. in Bitcoin in Binance is 'BTC/USDT'
         """
         self.exchange_name = exchange_name.lower()
