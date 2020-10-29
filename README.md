@@ -1,1 +1,0 @@
-# crypto-auto-trader-platform
