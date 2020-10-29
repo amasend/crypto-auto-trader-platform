@@ -43,5 +43,8 @@ class HistoryDownloader:
                                                             'endTime': end_time})
                 for j in range(len(candles)):
                     candles[j].insert(0, self.crypto_symbol)
-                historical_data.append(candles)
+                    historical_data.append(candles[j])
+
+        for data in historical_data:
+            data[0] = data[0].replace("/", "_")
         return historical_data
