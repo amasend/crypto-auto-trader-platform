@@ -32,6 +32,7 @@ def upload_data(client, crypto_symbol, utc_timestamp, open_price, highest_price,
 
 
 def write_data_from_kafka(client):
+    """consumes data from kafka and uploads it to database"""
     bootstrap_servers = ['localhost:9092']
 
     value_serializer = lambda x: dumps(x).encode('utf-8')
