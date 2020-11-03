@@ -35,16 +35,14 @@ def write_data_from_kafka(client):
     """consumes data from kafka and uploads it to database"""
     bootstrap_servers = ['localhost:9092']
 
-    value_serializer = lambda x: dumps(x).encode('utf-8')
-
     consumer = KafkaConsumer(
         'crypto-trader-topic',
         bootstrap_servers=bootstrap_servers,
         auto_offset_reset='earliest',
-        enable_auto_commit=True,
-        value_deserializer=value_serializer)
+        enable_auto_commit=True)
 
-    for data in consumer:
+    for kafka_data in consumer:
+        data = kafka_data
         upload_data(client, data[0], data[1], data[2], data[3], data[4], data[5], data[6])
     # few prints to help with test if if it works on the spot
     #
