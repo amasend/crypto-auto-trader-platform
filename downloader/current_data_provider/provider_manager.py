@@ -26,5 +26,9 @@ class CurrentDataProvider:
                                                 params={'startTime': current_miliseconds - 60000,
                                                         'endTime': current_miliseconds})
             candles[0].insert(0, self.crypto_symbol)
+            candles[0][0] = candles[0][0].replace("/", "_")
             # save candles to influx database
             time.sleep(self.interval)
+
+
+CurrentDataProvider(60, 'binance', "BTC/USDT").provide_current_data()
