@@ -1,28 +1,40 @@
-from flask import Flask
+from flask import *
+from api.database.database_manager import DatabaseClient, create_user, hash_password
+import secrets
 
 app = Flask(__name__)
 
+client = DatabaseClient('users', "admin", "zaq1@WSX", "localhost")
 
-# user creates account
+
+# user creates an account
 @app.route("/users", methods=["POST"])
-def create_account(username, password):
-    return f"Hello f{username}"
+def create_account():
+    """ This function receives username and password and passes it to the database
+        it also generates api key """
+    username = request.headers['username']
+    password = request.headers['password']
+    hashed_password = hash_password(password)
+    api_key = secrets.token_urlsafe(30)
+    response = make_response()
+    create_user(client.connection, client.cursor, username, hashed_password, api_key)
+    return response, 200
 
 
 # user creates a bot
-@app.route("/<apiKey>/bots", methods=["POST"])
+@app.route("/bots", methods=["POST"])
 def create_bot():
-    return "Bot created"
+    return "Bot created", 200
 
 
 # user gets a current price
 @app.route("/current-prices", methods=["GET"])
 def current_prices():
-    return "Current prices"
+    return "Current prices", 200
 
 
 # user gets his trade history
-@app.route("/<apiKey>/trade-history", methods=["GET"])
+@app.route("/trade-history", methods=["GET"])
 def trade_history_():
     return "Trade history"
 
