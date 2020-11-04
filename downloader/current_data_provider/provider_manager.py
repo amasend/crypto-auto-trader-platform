@@ -29,6 +29,3 @@ class CurrentDataProvider:
             candles[0][0] = candles[0][0].replace("/", "_")
             # save candles to influx database
             time.sleep(self.interval)
-
-
-CurrentDataProvider(60, 'binance', "BTC/USDT").provide_current_data()
