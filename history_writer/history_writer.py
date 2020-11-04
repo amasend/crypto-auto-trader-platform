@@ -42,7 +42,7 @@ def write_data_from_kafka(client):
         enable_auto_commit=True)
 
     for kafka_data in consumer:
-        data = kafka_data
+        data = kafka_data.value
         upload_data(client, data[0], data[1], data[2], data[3], data[4], data[5], data[6])
     # few prints to help with test if if it works on the spot
     #
