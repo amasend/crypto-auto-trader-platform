@@ -28,15 +28,13 @@ def upload_data(
     client.write_points(json_body)
 
 
-def write_data_from_kafka(client,test_variable):
-    """consumes data from kafka and uploads it to database"""
-    consumer = downloader.helpfull_functions.setup_consumer('unittest',  True)
-
+def write_data_from_kafka(client, test_variable=0):
+    """consumes data from kafka and uploads it to database
+    test variable defaults to 0 but is used in tests if set to 1"""
+    consumer = downloader.helpfull_functions.setup_consumer('unittest', True)
     for kafka_data in consumer:
-        print(kafka_data.value)
         # data = bytes_to_array_conversion(kafka_data.value)
         data = kafka_data.value
         upload_data(client, data[0][0], data[0][1], data[0][2], data[0][3], data[0][4], data[0][5], data[0][6])
-        if test_variable==1:
+        if test_variable == 1:
             break
-

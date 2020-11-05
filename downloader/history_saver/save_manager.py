@@ -1,6 +1,7 @@
 import downloader.global_variables
 from downloader.helpfull_functions import setup_producer
 
+
 class HistorySaver:
 
     def __init__(self, crypto_history: list):
@@ -19,5 +20,4 @@ class HistorySaver:
             producer.send('unittest', value=data)
             downloader.global_variables.array_with_my_data.append(data)
             # this array will help with testing however isn't necessary for the code to work
-        print(downloader.global_variables.array_with_my_data)
         return "Data saved"

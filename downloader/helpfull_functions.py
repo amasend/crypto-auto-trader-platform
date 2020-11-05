@@ -14,6 +14,7 @@ def setup_client(host,
 
 
 def setup_consumer(topic, autocomit: bool,offset='earliest'):
+    """initializing consumer, have to be called before 'for x in consumer:'"""
     bootstrap_servers = ['localhost:9092']
     consumer = KafkaConsumer(
         f'{topic}',
@@ -26,6 +27,7 @@ def setup_consumer(topic, autocomit: bool,offset='earliest'):
 
 
 def setup_producer():
+    """initializing consumer, have to be called  'producer.send(database, value=x)'"""
     bootstrap_servers=['localhost:9092']
     value_serializer= lambda x: dumps(x).encode('utf-8')
     producer = KafkaProducer(bootstrap_servers=bootstrap_servers,
@@ -34,6 +36,7 @@ def setup_producer():
 
 
 def bytes_to_array_conversion(convertable_bytes):
+    """possibly useful function used in previous builds, right now not needed but ready for future use"""
     convertable_bytes = convertable_bytes.decode().split(",")
     new = []
     for elem in convertable_bytes:
@@ -49,7 +52,8 @@ def bytes_to_array_conversion(convertable_bytes):
     return new
 
 
-def reading_influxdv_query(client, object_of_intrest="*"):
+def reading_influxdb_query(client, object_of_intrest="*"):
+    """"""
     results = client.query(f'SELECT {object_of_intrest} FROM BTC_USDT')
     # print(client.get_list_database())
     return results

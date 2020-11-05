@@ -3,6 +3,7 @@ import time
 import downloader.global_variables
 from downloader.helpfull_functions import setup_producer
 
+
 class CurrentDataProvider:
 
     def __init__(self, interval: int, exchange_name: str, crypto_symbol: str):
@@ -19,7 +20,8 @@ class CurrentDataProvider:
         self.exchange = getattr(ccxt, self.exchange_name)()  # creating instance of an exchange
         self.crypto_symbol = crypto_symbol
 
-    def provide_current_data(self):
+    def provide_current_data(self, test=0):
+        """test variable defaults to 0 but is used in tests if set to 1"""
         while True:
             current_miliseconds = int(round(time.time() * 1000))
             current_miliseconds = current_miliseconds - current_miliseconds % 1000
@@ -33,15 +35,8 @@ class CurrentDataProvider:
             producer = setup_producer()
 
             producer.send('unittest', value=candles)
-            downloader.global_variables.array_with_my_data.append(candles)
-            return(downloader.global_variables.array_with_my_data)
-            # downloader.global_variables.array_with_my_data.append(candles)
-            # print(downloader.global_variables.array_with_my_data)
-            break
-
-            # time.sleep(self.interval)
-
-
-# CurrentDataProvider(60, 'binance', 'BTC/USDT').provide_current_data()
-
-
+            if test == 1:
+                downloader.global_variables.array_with_my_data.append(candles)
+                return (downloader.global_variables.array_with_my_data)
+            else:
+                time.sleep(self.interval)

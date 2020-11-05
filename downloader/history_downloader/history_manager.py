@@ -48,4 +48,3 @@ class HistoryDownloader:
         for data in historical_data:
             data[0] = data[0].replace("/", "_")
         return historical_data
-
