@@ -54,7 +54,7 @@ def current_prices():
 # user gets his trade history
 @app.route("/trade-history", methods=["GET"])
 def trade_history_():
-    return "Trade history"
+    return "Trade history", 200
 
 
 # NOTE: all returns are mocked for now
