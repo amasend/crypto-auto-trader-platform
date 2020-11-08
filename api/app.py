@@ -1,5 +1,5 @@
 from flask import *
-from api.database.database_manager import DatabaseClient, create_user, hash_password, add_exchange
+from api.database.database_manager import *
 import secrets
 from downloader.current_data_provider.provider_manager import download_current_data
 
@@ -30,7 +30,9 @@ def create_exchange():
     password = request.form['password']
     exchange_name = request.form['exchange_name']
     exchange_api_key = request.form['exchange_api_key']
-    add_exchange_result = add_exchange(client.connection, client.cursor, username, password, exchange_name, exchange_api_key)
+    secret = request.form['secret']
+    add_exchange_result = add_exchange(client.connection, client.cursor, username, password, exchange_name,
+                                       exchange_api_key, secret)
     return add_exchange_result, 200
 
 
@@ -52,9 +54,15 @@ def current_prices():
 
 
 # user gets his trade history
-@app.route("/trade-history", methods=["GET"])
-def trade_history_():
-    return "Trade history", 200
+@app.route("/trade-history", methods=["POST"])
+def trade_history():
+    username = request.form['username']
+    password = request.form['password']
+    exchange_name = request.form['exchange_name']
+    crypto_symbol = request.form['crypto_symbol']
+    crypto_symbol = crypto_symbol.replace("_", "/")
+    user_trades = get_user_trades(client.cursor, username, password, exchange_name, crypto_symbol)
+    return str(user_trades), 200
 
 
 # NOTE: all returns are mocked for now

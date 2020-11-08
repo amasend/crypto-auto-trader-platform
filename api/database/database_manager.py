@@ -1,5 +1,6 @@
 import psycopg2 as psycopg2
 from passlib.hash import sha256_crypt
+import ccxt
 
 
 class DatabaseClient:
@@ -31,7 +32,27 @@ def create_user(connection, cursor, username, password, api_key):
         return "Error"
 
 
-def add_exchange(connection, cursor, username, password, exchange_name, exchange_api_key):
+# NOTE: This function will be implemented soon, I know that the code is doubled below
+
+# def authenticate_user(cursor, username, password):
+#     try:
+#         cursor.execute("""SELECT * FROM users
+#         WHERE username = '{0}'""".format(username))
+#         user_data = cursor.fetchall()[0]
+#         username = user_data[0]
+#         db_password = user_data[1]  # hashed password from database
+#         if username == username and sha256_crypt.verify(password, db_password):
+#             # VERIFIED - username and password are correct
+#             return user_data
+#         else:
+#             # NOT VERIFIED - username or password is incorrect
+#             return False
+#
+#     except (Exception, psycopg2.DatabaseError) as error:
+#         print(error)
+#         return "Error"
+
+def add_exchange(connection, cursor, username, password, exchange_name, exchange_api_key, secret):
     """ This function adds users' exchange
         Paramaters
         ------------
@@ -41,6 +62,7 @@ def add_exchange(connection, cursor, username, password, exchange_name, exchange
         password: str required - password
         exchange_name: str required - name of and exchange, e.g. binance
         exchange_api_key: str required - api key from an exchange, e.g. from binance
+        secret: str required - secret api key from an exchange, e.g. from binance
     """
     try:
         cursor.execute("""SELECT * FROM users
@@ -53,7 +75,8 @@ def add_exchange(connection, cursor, username, password, exchange_name, exchange
             # VERIFIED - username and password are correct
 
             cursor.execute("""INSERT INTO exchanges
-            VALUES('{0}', '{1}', '{2}', '{3}');""".format(exchange_name, username, exchange_api_key, user_api_key))
+            VALUES('{0}', '{1}', '{2}', '{3}', '{4}');""".format(exchange_name, username, exchange_api_key,
+                                                                 user_api_key, secret))
             connection.commit()
             return "Exchange created"
         else:
@@ -69,3 +92,31 @@ def hash_password(password):
     """ This function hashes password """
     hashed_password = sha256_crypt.hash(password)
     return hashed_password
+
+
+def get_user_trades(cursor, username, password, exchange_name, symbol):
+    cursor.execute("""SELECT * FROM users
+            WHERE username = '{0}'""".format(username))
+    user_data = cursor.fetchall()[0]
+    username = user_data[0]
+    db_password = user_data[1]  # hashed password from database
+    user_api_key = user_data[2]
+    if username == username and sha256_crypt.verify(password, db_password):
+        # VERIFIED - username and password are correct
+
+        cursor.execute("""SELECT * FROM exchanges
+                    WHERE user_api_key = '{0}'""".format(user_api_key))
+        exchange_data = cursor.fetchall()[0]
+        exchange_api_key = exchange_data[2]
+        secret = exchange_data[4]
+
+        exchange = getattr(ccxt, exchange_name)()
+        exchange.apiKey = exchange_api_key
+        exchange.secret = secret
+        if exchange.has['fetchMyTrades']:
+            return exchange.fetch_my_trades(symbol=symbol)
+
+        return "Exchange created"
+    else:
+        # NOT VERIFIED - username or password is incorrect
+        return "Username or password is incorrect"
