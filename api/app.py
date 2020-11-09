@@ -5,6 +5,7 @@ from downloader.current_data_provider.provider_manager import download_current_d
 
 app = Flask(__name__)
 
+# postrges client
 client = DatabaseClient("crypto-trader", "admin", "zaq1@WSX", "localhost")
 
 
@@ -46,15 +47,18 @@ def create_bot():
 @app.route("/current-prices", methods=["GET"])
 def current_prices():
     params = request.args
-    crypto_symbol = params.getlist('symbol')[0]
-    exchange_name = params.getlist('exchange')[0]
+    crypto_symbol = params.getlist('crypto_symbol')[0]
+    exchange_name = params.getlist('exchange_name')[0]
     crypto_symbol = crypto_symbol.replace("_", "/")
     crypto_current_data = download_current_data(exchange_name, crypto_symbol)
-    return crypto_current_data, 200
+    if crypto_current_data:
+        return crypto_current_data, 200
+    else:
+        return 400
 
 
 # user gets his trade history
-@app.route("/trade-history", methods=["POST"])
+@app.route("/trades", methods=["POST"])
 def trade_history():
     username = request.form['username']
     password = request.form['password']
@@ -62,10 +66,9 @@ def trade_history():
     crypto_symbol = request.form['crypto_symbol']
     crypto_symbol = crypto_symbol.replace("_", "/")
     user_trades = get_user_trades(client.cursor, username, password, exchange_name, crypto_symbol)
-    return str(user_trades), 200
+    print(type(jsonify(user_trades)))
+    return jsonify(user_trades), 200
 
-
-# NOTE: all returns are mocked for now
 
 if __name__ == "__main__":
     app.run(debug=True)

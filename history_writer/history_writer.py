@@ -20,15 +20,15 @@ def upload_data(client, crypto_symbol, utc_timestamp, open_price, highest_price,
             "measurement": crypto_symbol,
             "time": utc_timestamp,
             "fields": {
-                "Open price": open_price,
-                "Highest price": highest_price,
-                "Lowest price": lowest_price,
-                "Closing price": closing_price,
-                "Volume ": volume
+                "Open_price": open_price,
+                "Highest_price": highest_price,
+                "Lowest_price": lowest_price,
+                "Closing_price": closing_price,
+                "Volume": volume
             }
         }]
 
-    client.write_points(json_body)
+    client.write_points(json_body, time_precision="ms")
 
 
 def write_data_from_kafka(client):
