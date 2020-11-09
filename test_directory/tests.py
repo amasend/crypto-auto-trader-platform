@@ -48,7 +48,6 @@ class TestConnection(unittest.TestCase):
         client = setup_client("localhost", "8086", "unittest_database")
         write_data_from_kafka(client, 1)
         self.assertIsNotNone(self.influx_db_records(client))
-        pass
 
 # CurrentDataProvider(60, 'binance', 'BTC/USDT').provide_current_data()
 # self.assertIsNotNone(message.value)
