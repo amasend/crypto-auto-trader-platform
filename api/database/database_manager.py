@@ -1,6 +1,7 @@
 import psycopg2 as psycopg2
 from passlib.hash import sha256_crypt
 import ccxt
+from api.database.exceptions import AuthenticationException, DatabaseException
 
 
 class DatabaseClient:
@@ -35,9 +36,9 @@ def create_user(connection, cursor, username, password, api_key):
 # NOTE: This function will be implemented soon, I know that the code is doubled below
 
 def authenticate_user(cursor, username, password):
-    cursor.execute("""SELECT * FROM users
-        WHERE username = '{0}'""".format(username))
     try:
+        cursor.execute("""SELECT * FROM users
+                WHERE username = '{0}'""".format(username))
         user_data = cursor.fetchall()[0]
         username = user_data[0]
         db_password = user_data[1]  # hashed password from database
@@ -45,10 +46,10 @@ def authenticate_user(cursor, username, password):
             # VERIFIED - username and password are correct
             return user_data
         else:
-            return "Username or password is incorrect"
+            raise AuthenticationException().message
     except:
         # NOT VERIFIED - username or password is incorrect
-        return "Username or password is incorrect"
+        return DatabaseException().message
 
 
 def add_exchange(connection, cursor, username, password, exchange_name, exchange_api_key, secret):
@@ -73,9 +74,9 @@ def add_exchange(connection, cursor, username, password, exchange_name, exchange
             connection.commit()
             return "Exchange created"
         except:
-            return "Error"
+            return DatabaseException().message
     else:
-        return "Username or password is incorrect"
+        return AuthenticationException().message
 
 
 def hash_password(password):
@@ -96,18 +97,20 @@ def get_user_trades(cursor, username, password, exchange_name, symbol):
     """
     user_data = authenticate_user(cursor, username, password)
     if user_data != False:
-        user_api_key = user_data[2]
-        cursor.execute("""SELECT * FROM exchanges
-                    WHERE user_api_key = '{0}'""".format(user_api_key))
-        exchange_data = cursor.fetchall()[0]
-        exchange_api_key = exchange_data[2]
-        secret = exchange_data[4]
+        try:
+            user_api_key = user_data[2]
+            cursor.execute("""SELECT * FROM exchanges
+                        WHERE user_api_key = '{0}'""".format(user_api_key))
+            exchange_data = cursor.fetchall()[0]
+            exchange_api_key = exchange_data[2]
+            secret = exchange_data[4]
 
-        exchange = getattr(ccxt, exchange_name)({'options': {'adjustForTimeDifference': True}})
-        exchange.apiKey = exchange_api_key
-        exchange.secret = secret
-        if exchange.has['fetchMyTrades']:
-            return exchange.fetch_my_trades(symbol=symbol)
-        return "Cannot get trades"
+            exchange = getattr(ccxt, exchange_name)({'options': {'adjustForTimeDifference': True}})
+            exchange.apiKey = exchange_api_key
+            exchange.secret = secret
+            if exchange.has['fetchMyTrades']:
+                return exchange.fetch_my_trades(symbol=symbol)
+        except:
+            return DatabaseException().message
     else:
-        return "Username or password is incorrect"
+        return AuthenticationException().message

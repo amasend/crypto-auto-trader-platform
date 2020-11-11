@@ -66,7 +66,6 @@ def trade_history():
     crypto_symbol = request.form['crypto_symbol']
     crypto_symbol = crypto_symbol.replace("_", "/")
     user_trades = get_user_trades(client.cursor, username, password, exchange_name, crypto_symbol)
-    print(type(jsonify(user_trades)))
     return jsonify(user_trades), 200
 
 
