@@ -96,7 +96,8 @@ def get_user_trades(cursor, username, password, exchange_name, symbol):
         symbol: str - symbol of cryptocurrency, e.g. BTC/USDT
     """
     user_data = authenticate_user(cursor, username, password)
-    if user_data != False:
+
+    if not user_data:
         try:
             user_api_key = user_data[2]
             cursor.execute("""SELECT * FROM exchanges
