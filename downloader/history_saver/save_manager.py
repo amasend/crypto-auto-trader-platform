@@ -1,5 +1,5 @@
 import downloader.global_variables
-from downloader.helpfull_functions import setup_producer
+from helpfull_functions import setup_producer
 
 
 class HistorySaver:

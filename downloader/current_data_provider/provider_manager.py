@@ -1,7 +1,7 @@
 import ccxt
 import time
 import downloader.global_variables
-from downloader.helpfull_functions import setup_producer
+from helpfull_functions import setup_producer
 
 
 class CurrentDataProvider:
@@ -40,3 +40,21 @@ class CurrentDataProvider:
                 return (downloader.global_variables.array_with_my_data)
             else:
                 time.sleep(self.interval)
+
+
+def download_current_data(exchange_name: str, crypto_symbol: str):
+    """ this function downloads current cryptocurrency data
+        Paramaters
+        ------------
+        exchange_name: str required - name of cryptocurrency, e.g. 'binance'
+        crypto_symbol: str required - symbol of cryptocurrency, e.g. in Bitcoin in Binance is 'BTC/USDT'
+    """
+    exchange = getattr(ccxt, exchange_name)()
+    current_milliseconds = int(round(time.time() * 1000))
+    current_milliseconds = current_milliseconds - current_milliseconds % 1000
+    candles = exchange.fetch_ohlcv(crypto_symbol, '1m', limit=1,
+                                   params={'startTime': current_milliseconds - 60000,
+                                           'endTime': current_milliseconds})
+    candles[0].insert(0, crypto_symbol)
+    # save candles to influx database
+    return candles[0]

@@ -29,4 +29,4 @@ class DownloadManager:
 """ Example od downloading data from 2020-10-26 to today
     DownloadManager('binance', 'BTC/USDT', 2020, 10, 26).download_history()
 """
-DownloadManager('binance', 'BTC/USDT', 2020, 11, 3).download_history()
+DownloadManager('binance', 'BTC/USDT', 2020, 11, 8).download_history()
