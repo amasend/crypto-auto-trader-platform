@@ -59,9 +59,9 @@ def download_current_data(exchange_name: str, crypto_symbol: str):
     # save candles to influx database
     return candles[0]
 
-
 if __name__ == "__main__":
     """ This example code downloasd current crypto data every minute and saves it to database
     provider = CurrentDataProvider("binance")
     provider.provide_current_data('BTC/USDT') """
     provide_current_data("binance", 'BTC/USDT')
+

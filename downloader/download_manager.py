@@ -24,7 +24,7 @@ class DownloadManager:
         crypto_history = history_downloader.get_history()
         HistorySaver(crypto_history).save_history()
 
-
+        
 
 """ Example od downloading data from 2020-10-26 to today
     DownloadManager('binance', 'BTC/USDT', 2020, 10, 26).download_history()
