@@ -58,3 +58,4 @@ def download_current_data(exchange_name: str, crypto_symbol: str):
     candles[0].insert(0, crypto_symbol)
     # save candles to influx database
     return candles[0]
+    # time.sleep(self.interval)
