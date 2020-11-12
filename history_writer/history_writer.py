@@ -1,14 +1,4 @@
-from influxdb import InfluxDBClient
-
-
-def setup_manager(host,
-                  port,
-                  database):
-    """initializing client, have to be called before upload_data"""
-    client = InfluxDBClient(host=f"{host}", port=f"{port}")
-    client.create_database(database)
-    client.switch_database(database)
-    return client
+import helpfull_functions
 
 
 def upload_data(
@@ -19,8 +9,7 @@ def upload_data(
         highest_price,
         lowest_price,
         closing_price,
-        volume
-    ):
+        volume):
     """composes json that will store all necessary data into a point, then writes it into database"""
     json_body = [
         {
@@ -32,15 +21,19 @@ def upload_data(
                 "Highest price": highest_price,
                 "Lowest price": lowest_price,
                 "Closing price": closing_price,
-                "Volume ": volume
+                "Volume": volume
             }
         }]
     client.write_points(json_body)
 
-    #
-    # few prints to help with test if if it works on the spot
-    #
-    # results = client.query(f'SELECT * FROM {crypto_symbol}')
-    # print(results)
-    # print(client.get_list_database())
 
+def write_data_from_kafka(client, test_variable=0):
+    """consumes data from kafka and uploads it to database
+    test variable defaults to 0 but is used in tests if set to 1"""
+    consumer = helpfull_functions.setup_consumer('unittest', True)
+    for kafka_data in consumer:
+        # data = bytes_to_array_conversion(kafka_data.value)
+        data = kafka_data.value
+        upload_data(client, data[0][0], data[0][1], data[0][2], data[0][3], data[0][4], data[0][5], data[0][6])
+        if test_variable == 1:
+            break
