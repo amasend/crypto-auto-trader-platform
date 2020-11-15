@@ -2,6 +2,7 @@ from flask import *
 from api.database.database_manager import *
 import secrets
 from downloader.current_data_provider.provider_manager import download_current_data
+from api.database.exceptions import CurrentPricesException
 
 app = Flask(__name__)
 
@@ -19,7 +20,7 @@ def create_account():
     hashed_password = hash_password(password)
     api_key = secrets.token_urlsafe(30)
     create_user_result = create_user(client.connection, client.cursor, username, hashed_password, api_key)
-    response = make_response()
+    response = make_response(create_user_result)
     response.headers["result"] = create_user_result
     return response, 200
 
@@ -47,14 +48,15 @@ def create_bot():
 @app.route("/current-prices", methods=["GET"])
 def current_prices():
     params = request.args
-    crypto_symbol = params.getlist('crypto_symbol')[0]
-    exchange_name = params.getlist('exchange_name')[0]
-    crypto_symbol = crypto_symbol.replace("_", "/")
-    crypto_current_data = download_current_data(exchange_name, crypto_symbol)
-    if crypto_current_data:
-        return crypto_current_data, 200
-    else:
-        return 400
+    try:
+        crypto_symbol = params.getlist('crypto_symbol')[0]
+        exchange_name = params.getlist('exchange_name')[0]
+        crypto_symbol = crypto_symbol.replace("_", "/")
+        crypto_current_data = download_current_data(exchange_name, crypto_symbol)
+
+        return crypto_current_data
+    except:
+        return CurrentPricesException().message
 
 
 # user gets his trade history

@@ -15,6 +15,7 @@ def setup_manager(host,
 
 def upload_data(client, crypto_symbol, utc_timestamp, open_price, highest_price, lowest_price, closing_price, volume):
     """composes json that will store all necessary data into a point, then writes it into database"""
+    crypto_symbol = crypto_symbol.replace("/","_")
     json_body = [
         {
             "measurement": crypto_symbol,

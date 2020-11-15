@@ -1,3 +1,9 @@
+from history_writer.history_writer import setup_manager, write_data_from_kafka
+
+# influxdb client
+influx_client = setup_manager("localhost", "8086", "crypto-trader")
+
+
 class HistorySaver:
     def __init__(self, crypto_history: list):
         """ init
@@ -8,6 +14,7 @@ class HistorySaver:
         self.crypto_history = crypto_history
 
     def save_history(self) -> str:
-        """ saving cryptocurrency history to database """
-        # here will be db saving method
+        """ saving cryptocurrency history from kafka  to database"""
+        write_data_from_kafka(influx_client)
+
         return "Data saved"
