@@ -4,7 +4,6 @@ import downloader.global_variables
 from helpfull_functions import setup_producer, setup_client
 
 influx_client = setup_client("localhost", "8086", "crypto-trader")
-
 def provide_current_data(self, test=0):
     """test variable defaults to 0 but is used in tests if set to 1"""
     while True:
