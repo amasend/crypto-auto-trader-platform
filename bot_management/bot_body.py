@@ -6,7 +6,11 @@ from binance.exceptions import BinanceAPIException, BinanceOrderException
 from downloader.global_variables import *
 
 
-class Bot:
+class Bot():
+
+    def __init__(self, bot_id):
+        self.running = True
+        self.bot_id = bot_id
 
     def switcher(self, bot_id, binance_client, amount, what_to_do="waiting", test="0"):
         """bot function that does all what bot does"""
@@ -32,7 +36,7 @@ class Bot:
             elif test == 3:
                 try:
                     buy_order = binance_client.create_test_order(
-                        symbol='BNBUSDT',
+                        symbol='BTCUSDT',
                         side=SIDE_BUY,
                         type=ORDER_TYPE_MARKET,
                         quantity=amount)
@@ -46,7 +50,7 @@ class Bot:
             else:
                 try:
                     buy_order = binance_client.create_order(
-                        symbol='BTCSDT',
+                        symbol='BTCUSDT',
                         side=SIDE_BUY,
                         type=ORDER_TYPE_MARKET,
                         quantity=amount)
@@ -95,7 +99,7 @@ class Bot:
             client.write_points(json_body)
             print("waiting")
 
-    def start_bot(self, bot_id, api_key, api_secret, test):
+    def start_bot(self, api_key, api_secret, test):
         """bot function that loops it's work till told otherwise(not implemented yet)"""
         if test == 1:
             # only needed for tests
@@ -103,14 +107,16 @@ class Bot:
         elif test == 2:
             # only needed for tests
             binance_client = Client(api_key, api_secret)
-            Bot.switcher(self, bot_id, binance_client, 1, "invest", test)
+            Bot.switcher(self, self.bot_id, binance_client, 1, "invest", test)
         else:
             binance_client = Client(api_key, api_secret)
-            while True:
+            while self.running:
+                print(self.bot_id)
                 amount_from_AI = 1
                 command_from_AI = "invest"
-                Bot.switcher(self, bot_id, binance_client, amount_from_AI, command_from_AI)
-                sleep(30)
+                Bot.switcher(self, self.bot_id, binance_client, amount_from_AI, command_from_AI)
+                sleep(10)
+
 
 # on the spot starting bot for testing
 # Bot().start_bot(11, 3)
