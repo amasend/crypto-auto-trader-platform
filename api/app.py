@@ -20,7 +20,8 @@ def create_account():
     password = request.form['password']
     hashed_password = hash_password(password)
     api_key = secrets.token_urlsafe(30)
-    create_user_result = create_user(client.connection, client.cursor, username, hashed_password, api_key)
+    create_user_result = create_user(
+        client.connection, client.cursor, username, hashed_password, api_key)
     response = make_response()
     response.headers["result"] = create_user_result
     return response, 200
@@ -85,7 +86,8 @@ def trade_history():
     exchange_name = request.form['exchange_name']
     crypto_symbol = request.form['crypto_symbol']
     crypto_symbol = crypto_symbol.replace("_", "/")
-    user_trades = get_user_trades(client.cursor, username, password, exchange_name, crypto_symbol)
+    user_trades = get_user_trades(
+        client.cursor, username, password, exchange_name, crypto_symbol)
     return jsonify(user_trades), 200
 
 
