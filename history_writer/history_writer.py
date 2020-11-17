@@ -34,7 +34,7 @@ def write_data_from_kafka(client, test_variable=0):
     for kafka_data in consumer:
         # data = bytes_to_array_conversion(kafka_data.value)
         data = kafka_data.value
-        upload_data(client, data[0][0], data[0][1], data[0][2], data[0][3], data[0][4], data[0][5], data[0][6])
+        upload_data(client, data[0][0], data[0][1], data[0]
+                    [2], data[0][3], data[0][4], data[0][5], data[0][6])
         if test_variable == 1:
             break
-
