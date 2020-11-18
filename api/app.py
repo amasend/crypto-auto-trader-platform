@@ -3,7 +3,7 @@ from api.database.database_manager import *
 import secrets
 from downloader.current_data_provider.provider_manager import download_current_data
 
-app = Flask(__name__)
+#app = Flask(__name__)
 
 # postrges client
 client = DatabaseClient("crypto-trader", "admin", "zaq1@WSX", "localhost")
