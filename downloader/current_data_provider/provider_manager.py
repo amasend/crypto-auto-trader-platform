@@ -1,47 +1,25 @@
 import ccxt
 import time
-import downloader.global_variables
-from helpfull_functions import setup_producer, setup_client
+from history_writer.history_writer import setup_manager, upload_data, write_data_from_kafka
 
-influx_client = setup_client("localhost", "8086", "crypto-trader")
-def provide_current_data(self, test=0):
-    """test variable defaults to 0 but is used in tests if set to 1"""
-    while True:
-        current_miliseconds = int(round(time.time() * 1000))
-        current_miliseconds = current_miliseconds - current_miliseconds % 1000
-        candles = self.exchange.fetch_ohlcv(self.crypto_symbol, '1m', limit=1,
-                                            params={'startTime': current_miliseconds - 60000,
-                                                    'endTime': current_miliseconds})
-
-        candles[0].insert(0, self.crypto_symbol)
-        candles[0][0] = candles[0][0].replace("/", "_")
-
-        producer = setup_producer()
-
-        producer.send('unittest', value=candles)
-        if test == 1:
-            downloader.global_variables.array_with_my_data.append(candles)
-            return (downloader.global_variables.array_with_my_data)
-        else:
-            time.sleep(self.interval)
+# influxdb client
+influx_client = setup_manager("localhost", "8086", "crypto-trader")
 
 
-def download_current_data(exchange_name: str, crypto_symbol: str):
-    """ this function downloads current cryptocurrency data
-        Paramaters
-        ------------
-        exchange_name: str required - name of cryptocurrency, e.g. 'binance'
-        crypto_symbol: str required - symbol of cryptocurrency, e.g. in Bitcoin in Binance is 'BTC/USDT'
-    """
+def provide_current_data(exchange_name: str, crypto_symbol: str):
     exchange = getattr(ccxt, exchange_name)()
-    current_milliseconds = int(round(time.time() * 1000))
-    current_milliseconds = current_milliseconds - current_milliseconds % 1000
-    candles = exchange.fetch_ohlcv(crypto_symbol, '1m', limit=1,
-                                   params={'startTime': current_milliseconds - 60000,
-                                           'endTime': current_milliseconds})
-    candles[0].insert(0, crypto_symbol)
-    # save candles to influx database
-    return candles[0]
+    while True:
+        current_milliseconds = int(round(time.time() * 1000))
+        current_milliseconds = current_milliseconds - current_milliseconds % 1000
+        candles = exchange.fetch_ohlcv(crypto_symbol, '1m', limit=1,
+                                       params={'startTime': current_milliseconds - 60000,
+                                               'endTime': current_milliseconds})
+        candles[0].insert(0, crypto_symbol)
+        candles[0][0] = candles[0][0].replace("/", "_")
+        data = candles[0]
+        # save data to influx database
+        upload_data(influx_client, data[0], data[1], data[2], data[3], data[4], data[5], data[6])
+        time.sleep(60)
 
 
 def download_current_data(exchange_name: str, crypto_symbol: str):
