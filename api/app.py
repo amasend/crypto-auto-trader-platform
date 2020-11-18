@@ -3,6 +3,7 @@ from api.database.database_manager import *
 import secrets
 from downloader.current_data_provider.provider_manager import download_current_data
 from bot_management.bot_manager import BotManager
+from time import ctime
 
 
 app = Flask(__name__)
@@ -20,8 +21,7 @@ def create_account():
     password = request.form['password']
     hashed_password = hash_password(password)
     api_key = secrets.token_urlsafe(30)
-    create_user_result = create_user(
-        client.connection, client.cursor, username, hashed_password, api_key)
+    create_user_result = create_user(client.connection, client.cursor, username, hashed_password, api_key)
     response = make_response()
     response.headers["result"] = create_user_result
     return response, 200
@@ -41,9 +41,11 @@ def create_exchange():
 
 
 # user creates a bot
-@app.route("/bots", methods=["GET"])
+@app.route("/bots", methods=["POST"])
 def create_bot():
-    return BotManager.create_bot_id(), 200
+    bot_id = BotManager.create_bot_id()
+    log_current_state_of_the_bot(client=client, bot_id=bot_id, action='CREATED')
+    return {"bot_id": f"{bot_id}"}, 200
 
 
 # user starts a bot
@@ -54,14 +56,17 @@ def start_bot():
     exchange_api_key = request.form['exchange_api_key']
     secret = request.form['secret']
     BotManager().run_bot(bot_id, exchange_api_key, secret, exchange_symbol)
-    return 'started_bot'
+    log_current_state_of_the_bot(client=client,bot_id=bot_id,action='STARTED')
+    return {"action": f"Started Bot {bot_id}"}, 200
 
 
 # user stops bot
 @app.route("/stop-bot", methods=["POST"])
-def create_bot():
+def stop_bot():
     bot_id = request.form['bot_id']
-    return BotManager.stop_bot(bot_id), 200
+    BotManager.stop_bot(bot_id)
+    log_current_state_of_the_bot(client=client,bot_id=bot_id,action='STOPPED')
+    return {"action": f"Stopped bot {bot_id}"}, 200
 
 
 # user gets a current price
@@ -86,8 +91,7 @@ def trade_history():
     exchange_name = request.form['exchange_name']
     crypto_symbol = request.form['crypto_symbol']
     crypto_symbol = crypto_symbol.replace("_", "/")
-    user_trades = get_user_trades(
-        client.cursor, username, password, exchange_name, crypto_symbol)
+    user_trades = get_user_trades(client.cursor, username, password, exchange_name, crypto_symbol)
     return jsonify(user_trades), 200
 
 
