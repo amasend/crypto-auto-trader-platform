@@ -22,12 +22,12 @@ def provide_current_data(exchange_name: str, crypto_symbol: str):
         time.sleep(60)
 
 
-def download_current_data(exchange_name: str, crypto_symbol: str):
+def download_current_data(crypto_symbol: str):
     """ this function downloads current cryptocurrency data """
     crypto_symbol = crypto_symbol.replace("/", "_")
     result = influx_client.query(
         ("select Open_price, Highest_price,Lowest_price,Closing_price, Volume  from {0} order by time DESC").format(
-            crypto_symbol))
+            crypto_symbol),epoch="s")
     return list(result.get_points(measurement=crypto_symbol))[0]
 
 
@@ -35,4 +35,3 @@ if __name__ == "__main__":
     """ This example code downloasd current crypto data every minute and saves it to database
     provider = CurrentDataProvider("binance")
     provider.provide_current_data('BTC/USDT') """
-    provide_current_data("binance", 'BTC/USDT')
