@@ -2,7 +2,7 @@ import psycopg2 as psycopg2
 from passlib.hash import sha256_crypt
 import ccxt
 from api.database.exceptions import AuthenticationException, DatabaseException
-
+from time import ctime
 
 class DatabaseClient:
     """ Paramaters
@@ -115,3 +115,15 @@ def get_user_trades(cursor, username, password, exchange_name, symbol):
             return DatabaseException().message
     else:
         return AuthenticationException().message
+
+
+def log_current_state_of_the_bot(client: object, bot_id: int, action: str):
+    """Used to save to table bot_runtime_logs current state of the bot with specified id
+        in order for it to work, table named bot_runtime_logs should be created beforehand
+        client: object - postgresql client logged beforehand
+        bot_id: int - id of bot that is changing state
+        action: str - CREATED/STARTED/STOPPED according to the action taken by bot)"""
+    postgres_insert_query = """ INSERT INTO bot_runtime_logs (ID, ACTION, TIMESTAMP) VALUES (%s,%s,%s)"""
+    record_to_insert = (bot_id, f'{action}', ctime())
+    client.cursor.execute(postgres_insert_query, record_to_insert)
+    client.connection.commit()

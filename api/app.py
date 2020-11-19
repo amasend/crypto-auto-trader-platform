@@ -2,6 +2,9 @@ from flask import *
 from api.database.database_manager import *
 import secrets
 from downloader.current_data_provider.provider_manager import download_current_data
+from bot_management.bot_manager import BotManager
+from time import ctime
+
 
 app = Flask(__name__)
 
@@ -40,7 +43,30 @@ def create_exchange():
 # user creates a bot
 @app.route("/bots", methods=["POST"])
 def create_bot():
-    return "Bot created", 200
+    bot_id = BotManager.create_bot_id()
+    log_current_state_of_the_bot(client=client, bot_id=bot_id, action='CREATED')
+    return {"bot_id": f"{bot_id}"}, 200
+
+
+# user starts a bot
+@app.route("/start-bot", methods=["POST"])
+def start_bot():
+    bot_id = request.form['bot_id']
+    exchange_symbol = request.form['exchange_symbol']
+    exchange_api_key = request.form['exchange_api_key']
+    secret = request.form['secret']
+    BotManager().run_bot(bot_id, exchange_api_key, secret, exchange_symbol)
+    log_current_state_of_the_bot(client=client,bot_id=bot_id,action='STARTED')
+    return {"action": f"Started Bot {bot_id}"}, 200
+
+
+# user stops bot
+@app.route("/stop-bot", methods=["POST"])
+def stop_bot():
+    bot_id = request.form['bot_id']
+    BotManager.stop_bot(bot_id)
+    log_current_state_of_the_bot(client=client,bot_id=bot_id,action='STOPPED')
+    return {"action": f"Stopped bot {bot_id}"}, 200
 
 
 # user gets a current price
