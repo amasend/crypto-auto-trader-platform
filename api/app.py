@@ -2,7 +2,9 @@ from flask import *
 from api.database.database_manager import *
 import secrets
 from downloader.current_data_provider.provider_manager import download_current_data
-from api.database.exceptions import CurrentPricesException
+from bot_management.bot_manager import BotManager
+from time import ctime
+
 
 app = Flask(__name__)
 
@@ -20,7 +22,7 @@ def create_account():
     hashed_password = hash_password(password)
     api_key = secrets.token_urlsafe(30)
     create_user_result = create_user(client.connection, client.cursor, username, hashed_password, api_key)
-    response = make_response(create_user_result)
+    response = make_response()
     response.headers["result"] = create_user_result
     return response, 200
 
@@ -41,22 +43,44 @@ def create_exchange():
 # user creates a bot
 @app.route("/bots", methods=["POST"])
 def create_bot():
-    return "Bot created", 200
+    bot_id = BotManager.create_bot_id()
+    log_current_state_of_the_bot(client=client, bot_id=bot_id, action='CREATED')
+    return {"bot_id": f"{bot_id}"}, 200
+
+
+# user starts a bot
+@app.route("/start-bot", methods=["POST"])
+def start_bot():
+    bot_id = request.form['bot_id']
+    exchange_symbol = request.form['exchange_symbol']
+    exchange_api_key = request.form['exchange_api_key']
+    secret = request.form['secret']
+    BotManager().run_bot(bot_id, exchange_api_key, secret, exchange_symbol)
+    log_current_state_of_the_bot(client=client,bot_id=bot_id,action='STARTED')
+    return {"action": f"Started Bot {bot_id}"}, 200
+
+
+# user stops bot
+@app.route("/stop-bot", methods=["POST"])
+def stop_bot():
+    bot_id = request.form['bot_id']
+    BotManager.stop_bot(bot_id)
+    log_current_state_of_the_bot(client=client,bot_id=bot_id,action='STOPPED')
+    return {"action": f"Stopped bot {bot_id}"}, 200
 
 
 # user gets a current price
 @app.route("/current-prices", methods=["GET"])
 def current_prices():
     params = request.args
-    try:
-        crypto_symbol = params.getlist('crypto_symbol')[0]
-        exchange_name = params.getlist('exchange_name')[0]
-        crypto_symbol = crypto_symbol.replace("_", "/")
-        crypto_current_data = download_current_data(exchange_name, crypto_symbol)
-
-        return crypto_current_data
-    except:
-        return CurrentPricesException().message
+    crypto_symbol = params.getlist('crypto_symbol')[0]
+    exchange_name = params.getlist('exchange_name')[0]
+    crypto_symbol = crypto_symbol.replace("_", "/")
+    crypto_current_data = download_current_data(exchange_name, crypto_symbol)
+    if crypto_current_data:
+        return crypto_current_data, 200
+    else:
+        return 400
 
 
 # user gets his trade history
@@ -73,3 +97,4 @@ def trade_history():
 
 if __name__ == "__main__":
     app.run(debug=True)
+ 
