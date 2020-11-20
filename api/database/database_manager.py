@@ -28,9 +28,8 @@ def create_user(connection, cursor, username, password, api_key):
         returning user;""", (username, password, api_key))
         connection.commit()
         return "User created"
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
-        return "Error"
+    except:
+        return UserExistsException().message
 
 
 # NOTE: This function will be implemented soon, I know that the code is doubled below
@@ -46,10 +45,10 @@ def authenticate_user(cursor, username, password):
             # VERIFIED - username and password are correct
             return user_data
         else:
-            raise AuthenticationException().message
+            return AuthenticationException().message
     except:
         # NOT VERIFIED - username or password is incorrect
-        return DatabaseException().message
+        return AuthenticationException().message
 
 
 def add_exchange(connection, cursor, username, password, exchange_name, exchange_api_key, secret):
@@ -72,7 +71,7 @@ def add_exchange(connection, cursor, username, password, exchange_name, exchange
             VALUES('{0}', '{1}', '{2}', '{3}', '{4}');""".format(exchange_name, username, exchange_api_key,
                                                                  user_api_key, secret))
             connection.commit()
-            return "Exchange created"
+            return "Exchange addded to account"
         except:
             return DatabaseException().message
     else:
