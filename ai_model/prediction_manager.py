@@ -13,7 +13,7 @@ class PredictionManager:
         self.model = joblib.load(path)
         self.crypto_symbol = crypto_symbol
 
-    def predict_action(self, dataset: list):
+    def predict_action(self):
         """
         predicts action (buy, sell or wait) and returns it
         """
